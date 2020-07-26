@@ -14,8 +14,8 @@
 
 
 volatile uint16_t Capt,
-                  faza,
-                  d_faza = 12260;  // różnica miedzy odczytami co 1 s (wyliczyć, słuszna dla tego kwarcu!)
+         faza,
+         d_faza = 1240;  // różnica miedzy odczytami co 1 s (wyliczyć, słuszna dla tego kwarcu!)
 
 
 String odebraneDane = ""; //Pusty ciąg odebranych danych
@@ -41,6 +41,8 @@ void StartTimer1(void)
 {
   //Start timer without prescaller
   TCCR1B |= (1 << CS10);
+  TCCR1B &= ~(1 << CS11);
+  TCCR1B &= ~(1 << CS12);
   //Enable global interrutps
   sei();
 }
@@ -78,7 +80,7 @@ void loop() {
       k--;
     } else
     {
-      faza -= d_faza;
+      faza += d_faza;
       Serial.println((int)(Capt - faza) );
     };
     Flag = 0;
