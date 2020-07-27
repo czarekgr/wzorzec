@@ -5,22 +5,16 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#define wyjscie 9
 
 //ICP1 na 8 Arduino Nano
 
 // #define kwarc 16000000UL //znamionowa częstotliwość taktowania
-// #define kwarc 15992220UL //zmierzona częstotliwość kwarcu, k... prawie 8kHz odchyłki!!!
+// #define kwarc 15992296UL //zmierzona częstotliwość kwarcu, k... prawie 8kHz odchyłki!!!
 
 
-volatile uint16_t Capt,
-         faza,
-         d_faza = 1240;  // różnica miedzy odczytami co 1 s (wyliczyć, słuszna dla tego kwarcu!)
+volatile uint16_t Capt, faza;
 
 
-String odebraneDane = ""; //Pusty ciąg odebranych danych
-float czestotliwosc;
-unsigned long podzielnik;
 volatile uint8_t Flag = 0;
 byte k = 2;
 void InitTimer1(void)
@@ -28,10 +22,12 @@ void InitTimer1(void)
   //Set Initial Timer value
   TCCR1A = 0;
   TCNT1 = 0;
+  OCR1A = 48757;  // do tylu ma liczyć licznik
 
 
   //First capture on rising edge
   TCCR1B |= (1 << ICES1);
+
   //Enable input capture and overflow interrupts
   TIMSK1 |= (1 << ICIE1) | (1 << TOIE1);
 }
@@ -39,6 +35,8 @@ void InitTimer1(void)
 
 void StartTimer1(void)
 {
+  TCCR1B |= (1 << WGM12);
+
   //Start timer without prescaller
   TCCR1B |= (1 << CS10);
   TCCR1B &= ~(1 << CS11);
@@ -58,7 +56,6 @@ ISR(TIMER1_OVF_vect)
 
 ISR(TIMER1_CAPT_vect)
 {
-
   //save captured timestamp
   Capt = ICR1;
   Flag = 1;
@@ -80,7 +77,7 @@ void loop() {
       k--;
     } else
     {
-      faza += d_faza;
+
       Serial.println((int)(Capt - faza) );
     };
     Flag = 0;
