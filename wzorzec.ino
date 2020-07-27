@@ -17,7 +17,7 @@ volatile uint16_t Capt, faza;
 
 volatile uint8_t Flag = 0;
 byte k = 2;
-void InitTimer1(void)
+void StartTimer1(void)
 {
   //Set Initial Timer value
   TCCR1A = 0;
@@ -30,12 +30,8 @@ void InitTimer1(void)
 
   //Enable input capture and overflow interrupts
   TIMSK1 |= (1 << ICIE1) | (1 << TOIE1);
-}
 
-
-void StartTimer1(void)
-{
-  TCCR1B |= (1 << WGM12);
+  TCCR1B |= (1 << WGM12); //tryb TCT
 
   //Start timer without prescaller
   TCCR1B |= (1 << CS10);
@@ -64,7 +60,6 @@ ISR(TIMER1_CAPT_vect)
 void setup() {
   Serial.begin(9600); //Uruchomienie komunikacji
   Serial.println(F("Start"));
-  InitTimer1();
   StartTimer1();
 
 }
